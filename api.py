@@ -2,6 +2,9 @@ import os
 import subprocess
 
 
+naming_fixes = {'keystone-all':'keystone'}
+
+
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -29,7 +32,9 @@ def get_services_list(node):
     services = execute("ssh %s 'ps -aux' | grep 'python.*config-file' | awk '{print $12}' |  sort -u" % node)
     services = [os.path.basename(path) for path in services.split('\n')]
     cprint('[ Founded OpenStack Services on % s ]' % node, bcolors.OKBLUE)
-    for s in services:
+    for i, s in enumerate(services):
+	if s in naming_fixes:
+	   services[i] = naming_fixes[s]
         print ' --- %s' % s
     return services
 
@@ -66,7 +71,8 @@ def restart_services(node, services):
     # controlled by initd and pacemaker
     cprint('[ Restarting services %s ... ]' % node, bcolors.WARNING)
     for service in services:
-        print execute("ssh %s 'service % restart'" % (node, service))
+        print 'restarting: %s'%service
+	print execute("ssh %s 'service %s restart'" % (node, service))
 
 
 def restart_resources(node, resources):
