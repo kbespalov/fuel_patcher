@@ -1,8 +1,7 @@
 import os
 import subprocess
 
-
-naming_fixes = {'keystone-all':'keystone'}
+naming_fixes = {'keystone-all': 'keystone'}
 
 
 class bcolors:
@@ -33,8 +32,8 @@ def get_services_list(node):
     services = [os.path.basename(path) for path in services.split('\n')]
     cprint('[ Founded OpenStack Services on % s ]' % node, bcolors.OKBLUE)
     for i, s in enumerate(services):
-	if s in naming_fixes:
-	   services[i] = naming_fixes[s]
+        if s in naming_fixes:
+            services[i] = naming_fixes[s]
         print ' --- %s' % s
     return services
 
@@ -71,8 +70,8 @@ def restart_services(node, services):
     # controlled by initd and pacemaker
     cprint('[ Restarting services %s ... ]' % node, bcolors.WARNING)
     for service in services:
-        print 'restarting: %s'%service
-	print execute("ssh %s 'service %s restart'" % (node, service))
+        print 'restarting: %s' % service
+        print execute("ssh %s 'service %s restart'" % (node, service))
 
 
 def restart_resources(node, resources):
@@ -82,7 +81,7 @@ def restart_resources(node, resources):
 
 
 def clean(nodes_ip):
-    return [ ip.strip() for ip in nodes_ip] 	
+    return [ip.strip() for ip in nodes_ip]
 
 
 def fuel_controllers():
@@ -93,7 +92,6 @@ def fuel_computes():
     return clean(execute("fuel nodes 2>&1 | grep compute | awk -F '|' '{ print $5 }'").split('\n'))
 
 
-
 def copy_patch(nodes, filename='m.patch', location='/usr/lib/python2.7/dist-packages/'):
     for node in nodes:
         print '[ copying files to %s ]' % node
@@ -102,5 +100,5 @@ def copy_patch(nodes, filename='m.patch', location='/usr/lib/python2.7/dist-pack
         print execute("ssh %s 'cd %s && patch -p0 < ./%s'" % (node, location, filename))
         print '[ remove patch file %s ]' % node
         print execute("ssh %s 'rm %s/%s'" % (node, location, filename))
-	with open("patched.txt", "a") as myfile:
-   	     myfile.write(node+'\n')
+        with open("patched.txt", "a") as myfile:
+            myfile.write(node + '\n')
