@@ -81,24 +81,26 @@ def restart_resources(node, resources):
         print execute("ssh %s 'crm resource restart %s'" % (node, resource))
 
 
+def clean(nodes_ip):
+    return [ ip.strip() for ip in nodes_ip] 	
+
+
 def fuel_controllers():
-    return execute("fuel nodes 2>&1 | grep controller | awk '{ print $9 }'").split('\n')
+    return clean(execute("fuel nodes 2>&1 | grep controller | awk -F '|' '{ print $5 }'").split('\n'))
 
 
 def fuel_computes():
-    return execute("fuel nodes 2>&1 | grep compute | awk '{ print $9 }'").split('\n')
+    return clean(execute("fuel nodes 2>&1 | grep compute | awk -F '|' '{ print $5 }'").split('\n'))
 
 
 
-
-
-def copy_patch(nodes):
-    filename = 'monitor.patch'
+def copy_patch(nodes, filename='m.patch', location='/usr/lib/python2.7/dist-packages/'):
     for node in nodes:
-        location = '/usr/lib/python2.7/dist-packages/'
         print '[ copying files to %s ]' % node
         print execute('scp %s %s:%s' % (filename, node, location))
         print '[ apply patch to oslo.messaging %s ]' % node
         print execute("ssh %s 'cd %s && patch -p0 < ./%s'" % (node, location, filename))
         print '[ remove patch file %s ]' % node
         print execute("ssh %s 'rm %s/%s'" % (node, location, filename))
+	with open("patched.txt", "a") as myfile:
+   	     myfile.write(node+'\n')
